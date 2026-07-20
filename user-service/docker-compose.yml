@@ -1,0 +1,47 @@
+name: irctc-user-service-backend
+
+services:
+  # 1. PostgreSQL Database Service
+  postgres:
+    image: postgres:18-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: irctcpass
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. PGAdmin - Web Graphical Interface for Postgres
+  pgadmin:
+    image: dpage/pgadmin4:9.15
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+
+  # 3. Redis Stack - Combines Redis Server + Redis Insight Dashboard
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis
+    restart: always
+    environment:
+      REDIS_ARGS: "--requirepass irctcpass"
+    ports:
+      - "6379:6379" # Redis server port
+      - "8001:8001" # Redis Insight UI web port
+    volumes:
+      - redis_data:/data
+
+# Persistent Global Named Volumes (Prevents data loss when containers stop)
+volumes:
+  postgres_data:
+  redis_data:
